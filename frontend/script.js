@@ -1,56 +1,56 @@
-// function to get all books from the API
-async function getBooks() {
+// function to get all games from the API
+async function getGames() {
     try {
-        const response = await axios.get('http://127.0.0.1:5000/books');
-        const booksList = document.getElementById('books-list');
-        booksList.innerHTML = ''; // Clear existing list
+        const response = await axios.get('http://127.0.0.1:5000/games');
+        const gamesList = document.getElementById('games-list');
+        gamesList.innerHTML = ''; // Clear existing list
 
-        response.data.books.forEach(book => {
-            booksList.innerHTML += `
-                <div class="book-card">
-                    <h3>${book.title}</h3>
-                    <p>Author: ${book.author}</p>
-                    <p>Year: ${book.year_published}</p>
-                    <p>Type: ${book.types}</p>
+        response.data.games.forEach(game => {
+            gamesList.innerHTML += `
+                <div class="game-card">
+                    <h3>${game.name}</h3>
+                    <p>Creator: ${game.creator}</p>
+                    <p>Year Released: ${game.year_released}</p>
+                    <p>Genre: ${game.genre}</p>
                 </div>
             `;
         });
     } catch (error) {
-        console.error('Error fetching books:', error);
-        alert('Failed to load books');
+        console.error('Error fetching games:', error);
+        alert('Failed to load games');
     }
 }
 
-// function to add a new book to the database
-async function addBook() {
-    const title = document.getElementById('book-title').value;
-    const author = document.getElementById('book-author').value;
-    const year_published = document.getElementById('book-year-published').value;
-    const types = document.getElementById('book-type').value;
+// function to add a new game to the database
+async function addGame() {
+    const name = document.getElementById('game-name').value;
+    const creator = document.getElementById('game-creator').value;
+    const yearReleased = document.getElementById('game-year-released').value;
+    const genre = document.getElementById('game-genre').value;
 
     try {
-        await axios.post('http://127.0.0.1:5000/books', {
-            title: title,
-            author: author,
-            year_published: year_published,
-            types: types
+        await axios.post('http://127.0.0.1:5000/games', {
+            name: name,
+            creator: creator,
+            year_released: yearReleased,
+            genre: genre
         });
-        
-        // Clear form fields
-        document.getElementById('book-title').value = '';
-        document.getElementById('book-author').value = '';
-        document.getElementById('book-year-published').value = '';
-        document.getElementById('book-type').value = '';
 
-        // Refresh the books list
-        getBooks();
-        
-        alert('Book added successfully!');
+        // Clear form fields
+        document.getElementById('game-name').value = '';
+        document.getElementById('game-creator').value = '';
+        document.getElementById('game-year-released').value = '';
+        document.getElementById('game-genre').value = '';
+
+        // Refresh the games list
+        getGames();
+
+        alert('Game added successfully!');
     } catch (error) {
-        console.error('Error adding book:', error);
-        alert('Failed to add book');
+        console.error('Error adding game:', error);
+        alert('Failed to add game');
     }
 }
 
-// Load all books when page loads
-document.addEventListener('DOMContentLoaded', getBooks);
+// Load all games when page loads
+document.addEventListener('DOMContentLoaded', getGames);
