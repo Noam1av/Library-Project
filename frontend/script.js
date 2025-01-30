@@ -1,7 +1,13 @@
-// function to get all games from the API
 async function getGames() {
     try {
         const response = await axios.get('http://127.0.0.1:5000/games');
+
+        // Check if games data is returned
+        if (!response.data || !response.data.games || response.data.games.length === 0) {
+            alert('No games available');
+            return; // If no games, exit function
+        }
+
         const gamesList = document.getElementById('games-list');
         gamesList.innerHTML = ''; // Clear existing list
 
@@ -21,12 +27,17 @@ async function getGames() {
     }
 }
 
-// function to add a new game to the database
 async function addGame() {
     const name = document.getElementById('game-name').value;
     const creator = document.getElementById('game-creator').value;
     const yearReleased = document.getElementById('game-year-released').value;
     const genre = document.getElementById('game-genre').value;
+
+    // Check if all fields are filled
+    if (!name || !creator || !yearReleased || !genre) {
+        alert('Please fill in all fields!');
+        return; // Stop the function if any field is empty
+    }
 
     try {
         await axios.post('http://127.0.0.1:5000/games', {
@@ -51,6 +62,7 @@ async function addGame() {
         alert('Failed to add game');
     }
 }
+
 
 // Load all games when page loads
 document.addEventListener('DOMContentLoaded', getGames);
