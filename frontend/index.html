@@ -1,46 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Game Management System</title>
-    <link rel="stylesheet" href="styles.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Management</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <!-- Authentication Section -->
-        <div id="auth-section">
-            <h2>Authentication</h2>
-            <div id="login-form">
-                <input type="text" id="username" placeholder="Username" />
-                <input type="password" id="password" placeholder="Password" />
-                <button onclick="login()">Login</button>
-                <button onclick="register()">Register</button>
-            </div>
+    <!-- Login Section -->
+    <div id="auth-section">
+        <h2>Login</h2>
+        <label for="username">Username:</label>
+        <input type="text" id="username" required>
+        <label for="password">Password:</label>
+        <input type="password" id="password" required>
+        <button type="button" onclick="login()">Login</button> <!-- כאן type="button" למנוע הגשת טופס -->
+    </div>
+
+    <!-- Main Section (Hidden initially) -->
+    <div id="main-section" class="hidden">
+        <h2>Welcome to the Game Management System</h2>
+        <button onclick="logout()">Logout</button>
+
+        <!-- Add Game Section -->
+        <div>
+            <h3>Add New Game</h3>
+            <input type="text" id="game-title" placeholder="Game Name" required>
+            <input type="text" id="game-creator" placeholder="Game Creator" required>
+            <input type="number" id="game-year-released" placeholder="Release Year" required>
+            <input type="text" id="game-genre" placeholder="Game Genre" required>
+            <button onclick="addGame()">Add Game</button>
         </div>
 
-        <!-- Main Section -->
-        <div id="main-section" class="hidden">
-            <div class="header">
-                <h1>Game Management System</h1>
-                <button onclick="logout()">Logout</button>
-            </div>
-
-            <div class="games-section">
-                <h2>Add New Game</h2>
-                <div class="form-group">
-                    <input type="text" id="game-name" placeholder="Game Name" />
-                    <input type="text" id="game-creator" placeholder="Creator" />
-                    <input type="number" id="game-year-released" placeholder="Year Released" />
-                    <input type="text" id="game-genre" placeholder="Genre" />
-                    <button onclick="addGame()">Add Game</button>
-                </div>
-
-                <h2>All Games</h2>
-                <div id="games-list" class="games-grid"></div>
-            </div>
+        <!-- Games List -->
+        <div>
+            <h3>Games List</h3>
+            <div id="games-list"></div>
         </div>
     </div>
+
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="script.js"></script>
 </body>

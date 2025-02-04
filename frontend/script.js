@@ -1,17 +1,18 @@
-// function to get all games from the API
 async function getGames() {
     try {
-        const response = await axios.get('http://127.0.0.1:5000/games');
+        const response = await axios.get('http://127.0.0.1:5000/games', {
+            withCredentials: true  // לשלוח את העוגיה עם הבקשה
+        });
         const gamesList = document.getElementById('games-list');
         gamesList.innerHTML = ''; // Clear existing list
 
         response.data.games.forEach(game => {
             gamesList.innerHTML += `
                 <div class="game-card">
-                    <h3>${game.name}</h3>
-                    <p>Creator: ${game.creator}</p>
-                    <p>Year Released: ${game.year_released}</p>
+                    <h3>${game.title}</h3>
                     <p>Genre: ${game.genre}</p>
+                    <p>Price: ${game.price}</p>
+                    <p>Quantity: ${game.quantity}</p>
                 </div>
             `;
         });
@@ -21,26 +22,27 @@ async function getGames() {
     }
 }
 
-// function to add a new game to the database
 async function addGame() {
-    const name = document.getElementById('game-name').value;
-    const creator = document.getElementById('game-creator').value;
-    const yearReleased = document.getElementById('game-year-released').value;
+    const title = document.getElementById('game-title').value;
     const genre = document.getElementById('game-genre').value;
+    const price = document.getElementById('game-price').value;
+    const quantity = document.getElementById('game-quantity').value;
 
     try {
         await axios.post('http://127.0.0.1:5000/games', {
-            name: name,
-            creator: creator,
-            year_released: yearReleased,
-            genre: genre
+            title: title,
+            genre: genre,
+            price: price,
+            quantity: quantity
+        }, {
+            withCredentials: true  // לשלוח את העוגיה עם הבקשה
         });
 
         // Clear form fields
-        document.getElementById('game-name').value = '';
-        document.getElementById('game-creator').value = '';
-        document.getElementById('game-year-released').value = '';
+        document.getElementById('game-title').value = '';
         document.getElementById('game-genre').value = '';
+        document.getElementById('game-price').value = '';
+        document.getElementById('game-quantity').value = '';
 
         // Refresh the games list
         getGames();
@@ -52,5 +54,53 @@ async function addGame() {
     }
 }
 
-// Load all games when page loads
-document.addEventListener('DOMContentLoaded', getGames);
+async function login() {
+    const username = document.getElementById('username').value;
+    const passwordInput = document.getElementById('password').value;
+
+    axios.post('http://127.0.0.1:5000/login', {
+        username: username,
+        password: passwordInput
+    }, {
+        headers: {
+            "Content-Type": "application/json"
+        }
+    })
+    .then(response => {
+        localStorage.setItem('isLoggedIn', 'true');
+        alert(response.data.message);
+        document.getElementById("auth-section").classList.add("hidden");
+        document.getElementById("main-section").classList.remove("hidden");
+        getGames();
+    })
+    .catch(error => {
+        alert(error.response.data.error);
+    })
+}
+
+async function logout() {
+    axios.post('http://127.0.0.1:5000/logout', {}, {
+        withCredentials: true
+    }).then(response => {
+        alert(response.data.message);
+        document.getElementById("auth-section").classList.remove("hidden");
+        document.getElementById("main-section").classList.add("hidden");
+        localStorage.removeItem('isLoggedIn');
+    }).catch(error => {
+        alert('Error logging out');
+    });
+}
+
+function checkIfLoggedIn() {
+    const isLoggedIn = localStorage.getItem('isLoggedIn');
+    if (isLoggedIn === 'true') {
+        document.getElementById("auth-section").classList.add("hidden");
+        document.getElementById("main-section").classList.remove("hidden");
+        getGames();
+    } else {
+        document.getElementById("auth-section").classList.remove("hidden");
+        document.getElementById("main-section").classList.add("hidden");
+    }
+}
+
+window.onload = checkIfLoggedIn;
