@@ -14,6 +14,9 @@ db.init_app(app)
 @app.route('/games', methods=['POST'])
 def add_game():
     data = request.json
+    if not data['title'] or not data['genre'] or not data['price'] or not data['quantity']:
+        return jsonify({'error': 'All fields are required'}), 400
+
     new_game = Game(
         title=data['title'],
         genre=data['genre'],
@@ -55,9 +58,36 @@ def get_games():
         }), 500
 
 
-@app.route('/customer', methods=['GET'])
-def is_user_exits():
-    pass
+@app.route('/games/<int:game_id>', methods=['PUT'])
+def edit_game(game_id):
+    data = request.json
+    game = Game.query.get(game_id)
+    if not game:
+        return jsonify({'error': 'Game not found'}), 404
+
+    # Update fields
+    if 'title' in data:
+        game.title = data['title']
+    if 'genre' in data:
+        game.genre = data['genre']
+    if 'price' in data:
+        game.price = data['price']
+    if 'quantity' in data:
+        game.quantity = data['quantity']
+
+    db.session.commit()
+    return jsonify({'message': 'Game updated successfully'}), 200
+
+
+@app.route('/games/<int:game_id>', methods=['DELETE'])
+def delete_game(game_id):
+    game = Game.query.get(game_id)
+    if not game:
+        return jsonify({'error': 'Game not found'}), 404
+
+    db.session.delete(game)
+    db.session.commit()
+    return jsonify({'message': 'Game deleted successfully'}), 200
 
 
 @app.route('/add_admin', methods=['POST'])
@@ -90,7 +120,31 @@ def login():
 
 @app.route('/logout', methods=['POST'])
 def logout():
-    return jsonify({'message': 'You are logout.'}), 200
+    return jsonify({'message': 'You are logged out.'}), 200
+
+
+
+@app.route('/games/<int:game_id>/loan', methods=['PUT'])
+def loan_game(game_id):
+    data = request.json
+    customer_id = data.get('customer_id')  # מזהה הלקוח שמשאיל את המשחק
+
+    # מציאת המשחק
+    game = Game.query.get(game_id)
+    if not game:
+        return jsonify({'error': 'Game not found'}), 404
+
+    # אם המשחק כבר מושאל, לא ניתן לשאול אותו שוב
+    if game.loan_status:
+        return jsonify({'error': 'Game is already loaned out'}), 400
+
+    # עדכון הסטטוס של המשחק
+    game.loan_status = True  # המשחק מושאל
+    game.customer_relationship = customer_id  # שמירה על מזהה הלקוח
+
+    db.session.commit()
+    return jsonify({'message': f'Game "{game.title}" loaned to customer with ID {customer_id} successfully'}), 200
+
 
 
 if __name__ == '__main__':

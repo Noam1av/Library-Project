@@ -11,12 +11,16 @@ async function getGames() {
                     <p>Genre: ${game.genre}</p>
                     <p>Price: ${game.price}</p>
                     <p>Quantity: ${game.quantity}</p>
+                    <p>Status: ${game.loan_status ? 'Loaned' : 'Available'}</p>
+                    <button onclick="loanGame(${game.id})">Loan Game</button>
+                    <button onclick="editGame(${game.id})">Edit Game</button>
+                    <button onclick="deleteGame(${game.id})">Delete Game</button>
                 </div>
             `;
         });
     } catch (error) {
         console.error('Error fetching games:', error);
-        alert('Failed to load games1');
+        alert('Failed to load games.');
     }
 }
 
@@ -41,48 +45,109 @@ async function addGame() {
         alert('Game added successfully!');
     } catch (error) {
         console.error('Error adding game:', error);
-        alert('Failed to add game2');
+        alert('Failed to add game.');
     }
 }
-async function login(){
+
+async function loanGame(gameId) {
+    const customerId = prompt("Enter the customer ID for the loan:");
+    if (!customerId) {
+        alert("Please enter a valid customer ID.");
+        return;
+    }
+
+    try {
+        await axios.post('http://127.0.0.1:5000/loan', {
+            game_id: gameId,
+            customer_id: customerId
+        });
+        alert("Game loaned successfully!");
+        getGames(); // Update the games list
+    } catch (error) {
+        console.error('Error loaning game:', error);
+        alert("Failed to loan the game.");
+    }
+}
+
+async function editGame(gameId) {
+    const newTitle = prompt("Enter the new title:");
+    const newGenre = prompt("Enter the new genre:");
+    const newPrice = prompt("Enter the new price:");
+    const newQuantity = prompt("Enter the new quantity:");
+
+    if (!newTitle || !newGenre || !newPrice || !newQuantity) {
+        alert("Please fill in all fields.");
+        return;
+    }
+
+    try {
+        await axios.put('http://127.0.0.1:5000/games/' + gameId, {
+            title: newTitle,
+            genre: newGenre,
+            price: newPrice,
+            quantity: newQuantity
+        });
+        alert("Game updated successfully!");
+        getGames(); // Update the games list
+    } catch (error) {
+        console.error('Error editing game:', error);
+        alert("Failed to edit the game.");
+    }
+}
+
+async function deleteGame(gameId) {
+    const confirmDelete = confirm("Are you sure you want to delete this game?");
+    if (!confirmDelete) {
+        return;
+    }
+
+    try {
+        await axios.delete('http://127.0.0.1:5000/games/' + gameId);
+        alert("Game deleted successfully!");
+        getGames(); // Update the games list
+    } catch (error) {
+        console.error('Error deleting game:', error);
+        alert("Failed to delete the game.");
+    }
+}
+
+async function login() {
     const emailInput = document.getElementById('email').value;
     const passwordInput = document.getElementById('password').value;
 
-    axios.post('http://127.0.0.1:5000/login',{
-        email:emailInput,
-        password:passwordInput
-    },{
-        Headers:{
-            "Content-Type":"application/json"
-        }
+    axios.post('http://127.0.0.1:5000/login', {
+        email: emailInput,
+        password: passwordInput
     })
-    .then(response=>{
-        localStorage.setItem('isLoggedIn','true');
+    .then(response => {
+        localStorage.setItem('isLoggedIn', 'true');
         alert(response.data.message);
         document.getElementById("auth-section").classList.add("hidden");
         document.getElementById("main-section").classList.remove("hidden");
+        getGames();
     })
-    .catch(error=>{
+    .catch(error => {
         alert(error.response.data.error);
-    })
+    });
 }
-async function logout(){
+
+async function logout() {
     localStorage.removeItem('isLoggedIn');
     document.getElementById("auth-section").classList.remove("hidden");
     document.getElementById("main-section").classList.add("hidden");
-    alert(response.data.message);
+    alert("Logged out successfully.");
 }
-function checkIfLoggedIn(){
+
+function checkIfLoggedIn() {
     const isLoggedIn = localStorage.getItem('isLoggedIn');
-    if(isLoggedIn == 'true'){
+    if (isLoggedIn == 'true') {
         document.getElementById("auth-section").classList.add("hidden");
         document.getElementById("main-section").classList.remove("hidden");
         getGames();
-    }
-    else{
+    } else {
         document.getElementById("auth-section").classList.remove("hidden");
         document.getElementById("main-section").classList.add("hidden");
     }
 }
+
 window.onload = checkIfLoggedIn;
-document.addEventListener('DOMContentLoaded', getGames);
