@@ -1,10 +1,8 @@
 async function getGames() {
     try {
-        const response = await axios.get('http://127.0.0.1:5000/games', {
-            withCredentials: true  // לשלוח את העוגיה עם הבקשה
-        });
+        const response = await axios.get('http://127.0.0.1:5000/games');
         const gamesList = document.getElementById('games-list');
-        gamesList.innerHTML = ''; // Clear existing list
+        gamesList.innerHTML = '';
 
         response.data.games.forEach(game => {
             gamesList.innerHTML += `
@@ -18,7 +16,7 @@ async function getGames() {
         });
     } catch (error) {
         console.error('Error fetching games:', error);
-        alert('Failed to load games');
+        alert('Failed to load games1');
     }
 }
 
@@ -34,73 +32,57 @@ async function addGame() {
             genre: genre,
             price: price,
             quantity: quantity
-        }, {
-            withCredentials: true  // לשלוח את העוגיה עם הבקשה
         });
 
-        // Clear form fields
         document.getElementById('game-title').value = '';
-        document.getElementById('game-genre').value = '';
         document.getElementById('game-price').value = '';
         document.getElementById('game-quantity').value = '';
-
-        // Refresh the games list
         getGames();
-
         alert('Game added successfully!');
     } catch (error) {
         console.error('Error adding game:', error);
-        alert('Failed to add game');
+        alert('Failed to add game2');
     }
 }
-
-async function login() {
-    const username = document.getElementById('username').value;
+async function login(){
+    const emailInput = document.getElementById('email').value;
     const passwordInput = document.getElementById('password').value;
 
-    axios.post('http://127.0.0.1:5000/login', {
-        username: username,
-        password: passwordInput
-    }, {
-        headers: {
-            "Content-Type": "application/json"
+    axios.post('http://127.0.0.1:5000/login',{
+        email:emailInput,
+        password:passwordInput
+    },{
+        Headers:{
+            "Content-Type":"application/json"
         }
     })
-    .then(response => {
-        localStorage.setItem('isLoggedIn', 'true');
+    .then(response=>{
+        localStorage.setItem('isLoggedIn','true');
         alert(response.data.message);
         document.getElementById("auth-section").classList.add("hidden");
         document.getElementById("main-section").classList.remove("hidden");
-        getGames();
     })
-    .catch(error => {
+    .catch(error=>{
         alert(error.response.data.error);
     })
 }
-
-async function logout() {
-    axios.post('http://127.0.0.1:5000/logout', {}, {
-        withCredentials: true
-    }).then(response => {
-        alert(response.data.message);
-        document.getElementById("auth-section").classList.remove("hidden");
-        document.getElementById("main-section").classList.add("hidden");
-        localStorage.removeItem('isLoggedIn');
-    }).catch(error => {
-        alert('Error logging out');
-    });
+async function logout(){
+    localStorage.removeItem('isLoggedIn');
+    document.getElementById("auth-section").classList.remove("hidden");
+    document.getElementById("main-section").classList.add("hidden");
+    alert(response.data.message);
 }
-
-function checkIfLoggedIn() {
+function checkIfLoggedIn(){
     const isLoggedIn = localStorage.getItem('isLoggedIn');
-    if (isLoggedIn === 'true') {
+    if(isLoggedIn == 'true'){
         document.getElementById("auth-section").classList.add("hidden");
         document.getElementById("main-section").classList.remove("hidden");
         getGames();
-    } else {
+    }
+    else{
         document.getElementById("auth-section").classList.remove("hidden");
         document.getElementById("main-section").classList.add("hidden");
     }
 }
-
 window.onload = checkIfLoggedIn;
+document.addEventListener('DOMContentLoaded', getGames);
