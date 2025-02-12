@@ -42,7 +42,6 @@ def get_games():
                 'price': game.price,
                 'quantity': game.quantity,
                 'loan_status': game.loan_status,
-                'customer_relationship': game.customer_relationship
             }
             games_list.append(game_data)
 
