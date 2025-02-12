@@ -54,6 +54,19 @@
                 <div id="loaned-games-list" class="games-container"></div>
             </div>
         </div>
+        <div class="customers-section">
+    <h2>Add New Customer</h2>
+    <div class="form-group">
+        <input type="text" id="customer-name" placeholder="Name" />
+        <input type="text" id="customer-email" placeholder="Email" />
+        <input type="text" id="customer-phone" placeholder="Phone" />
+        <button onclick="addCustomer()">Add Customer</button>
+    </div>
+
+    <h2>All Customers</h2>
+    <div id="customers-list" class="customers-container"></div>
+</div>
+
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>

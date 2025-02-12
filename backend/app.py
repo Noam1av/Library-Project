@@ -11,6 +11,62 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///games_shop.db'
 db.init_app(app)
 
 
+@app.route('/customers', methods=['POST'])
+def add_customer():
+    data = request.json
+    if not data['name'] or not data['email'] or not data['phone']:
+        return jsonify({'error': 'All fields are required'}), 400
+
+    new_customer = Customer(
+        name=data['name'],
+        email=data['email'],
+        phone=data['phone']
+    )
+    db.session.add(new_customer)
+    db.session.commit()
+    return jsonify({'message': 'Customer added successfully'}), 201
+
+
+@app.route('/customers', methods=['GET'])
+def get_customers():
+    try:
+        customers = Customer.query.all()
+        customers_list = [{'id': c.id, 'name': c.name, 'email': c.email, 'phone': c.phone} for c in customers]
+        return jsonify({'customers': customers_list}), 200
+    except Exception as e:
+        return jsonify({'error': 'Failed to retrieve customers', 'message': str(e)}), 500
+
+
+@app.route('/customers/<int:customer_id>', methods=['PUT'])
+def edit_customer(customer_id):
+    data = request.json
+    customer = Customer.query.get(customer_id)
+    if not customer:
+        return jsonify({'error': 'Customer not found'}), 404
+
+    if 'name' in data:
+        customer.name = data['name']
+    if 'email' in data:
+        customer.email = data['email']
+    if 'phone' in data:
+        customer.phone = data['phone']
+
+    db.session.commit()
+    return jsonify({'message': 'Customer updated successfully'}), 200
+
+
+@app.route('/customers/<int:customer_id>', methods=['DELETE'])
+def delete_customer(customer_id):
+    customer = Customer.query.get(customer_id)
+    if not customer:
+        return jsonify({'error': 'Customer not found'}), 404
+
+    db.session.delete(customer)
+    db.session.commit()
+    return jsonify({'message': 'Customer deleted successfully'}), 200
+
+
+
 @app.route('/games', methods=['POST'])
 def add_game():
     data = request.json
