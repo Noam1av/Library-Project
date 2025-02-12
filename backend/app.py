@@ -189,17 +189,48 @@ def loan_game(game_id):
     if not game:
         return jsonify({'error': 'Game not found'}), 404
 
+    # מציאת הלקוח
+    customer = Customer.query.get(customer_id)
+    if not customer:
+        return jsonify({'error': 'Customer not found'}), 404
+
     # אם המשחק כבר מושאל, לא ניתן לשאול אותו שוב
     if game.loan_status:
         return jsonify({'error': 'Game is already loaned out'}), 400
 
     # עדכון הסטטוס של המשחק
     game.loan_status = True  # המשחק מושאל
-    game.customer_relationship = customer_id  # שמירה על מזהה הלקוח
+    game.customer_id = customer.id  # שמירה על מזהה הלקוח (בהנחה ששדה זה קיים)
 
     db.session.commit()
-    return jsonify({'message': f'Game "{game.title}" loaned to customer with ID {customer_id} successfully'}), 200
+    return jsonify({'message': f'Game "{game.title}" loaned to customer {customer.name} (ID {customer.id}) successfully'}), 200
 
+@app.route('/get_customer', methods=['POST'])
+def get_customer():
+    data = request.json
+    customer_name = data.get('name')
+
+    if not customer_name:
+        return jsonify({'error': 'Customer name is required'}), 400
+
+    customer = Customer.query.filter_by(name=customer_name).first()
+    if not customer:
+        return jsonify({'error': 'Customer not found'}), 404
+
+    return jsonify({'id': customer.id, 'name': customer.name}), 200
+
+
+@app.route('/loans', methods=['GET'])
+def get_loans():
+    loans = (
+        db.session.query(Game.title, Customer.name)
+        .join(Customer, Game.customer_id == Customer.id)
+        .filter(Game.loan_status == True)
+        .all()
+    )
+
+    loans_list = [{'title': game, 'customer_name': customer} for game, customer in loans]
+    return jsonify(loans_list), 200
 
 
 if __name__ == '__main__':

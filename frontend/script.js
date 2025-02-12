@@ -148,24 +148,47 @@ async function addGame() {
 }
 
 async function loanGame(gameId) {
-    const customerId = prompt("Enter the customer ID for the loan:");
-    if (!customerId) {
-        alert("Please enter a valid customer ID.");
+    const customerName = prompt("Enter the customer's name for the loan:");
+    if (!customerName) {
+        alert("Please enter a valid name.");
         return;
     }
 
     try {
-        await axios.post('http://127.0.0.1:5000/loan', {
-            game_id: gameId,
-            customer_id: customerId
-        });
-        alert("Game loaned successfully!");
-        getGames();
+        const response = await axios.post('http://127.0.0.1:5000/get_customer', { name: customerName });
+        const customer = response.data;
+
+        if (!customer || !customer.id) {
+            alert("Customer not found.");
+            return;
+        }
+
+        await axios.put(`http://127.0.0.1:5000/games/${gameId}/loan`, { customer_id: customer.id });
+        alert(`Game loaned to ${customer.name} successfully!`);
+        getGames(); // רענון רשימת המשחקים
     } catch (error) {
         console.error('Error loaning game:', error);
         alert("Failed to loan the game.");
     }
 }
+async function getLoans() {
+    try {
+        const response = await axios.get('http://127.0.0.1:5000/loans');
+        const loans = response.data;
+
+        let output = "<h2>Loaned Games</h2><ul>";
+        loans.forEach(loan => {
+            output += `<li><strong>${loan.title}</strong> - Loaned to ${loan.customer_name}</li>`;
+        });
+        output += "</ul>";
+
+        document.getElementById("loans-container").innerHTML = output;
+    } catch (error) {
+        console.error('Error fetching loans:', error);
+        alert("Failed to load loaned games.");
+    }
+}
+
 
 async function editGame(gameId) {
     const newTitle = prompt("Enter the new title:");
