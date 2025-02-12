@@ -77,18 +77,28 @@ async function editGame(gameId) {
     const newPrice = prompt("Enter the new price:");
     const newQuantity = prompt("Enter the new quantity:");
 
-    if (!newTitle || !newGenre || !newPrice || !newQuantity) {
-        alert("Please fill in all fields.");
+    const data = {};
+
+    if (newTitle) {
+        data.title = newTitle;
+    }
+    if (newGenre) {
+        data.genre = newGenre;
+    }
+    if (newPrice) {
+        data.price = newPrice;
+    }
+    if (newQuantity) {
+        data.quantity = newQuantity;
+    }
+
+    if (Object.keys(data).length === 0) {
+        alert("Please fill in at least one field.");
         return;
     }
 
     try {
-        await axios.put('http://127.0.0.1:5000/games/' + gameId, {
-            title: newTitle,
-            genre: newGenre,
-            price: newPrice,
-            quantity: newQuantity
-        });
+        await axios.put('http://127.0.0.1:5000/games/' + gameId, data);
         alert("Game updated successfully!");
         getGames();
     } catch (error) {
@@ -96,6 +106,7 @@ async function editGame(gameId) {
         alert("Failed to edit the game.");
     }
 }
+
 
 async function deleteGame(gameId) {
     const confirmDelete = confirm("Are you sure you want to delete this game?");
