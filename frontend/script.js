@@ -5,18 +5,19 @@ async function getGames() {
         gamesList.innerHTML = '';
 
         response.data.games.forEach(game => {
-            gamesList.innerHTML += `
-                <div class="game-card">
-                    <h3>${game.title}</h3>
-                    <p>Genre: ${game.genre}</p>
-                    <p>Price: ${game.price}</p>
-                    <p>Quantity: ${game.quantity}</p>
-                    <p>Status: ${game.loan_status ? 'Loaned' : 'Available'}</p>
-                    <button onclick="loanGame(${game.id})">Loan Game</button>
-                    <button onclick="editGame(${game.id})">Edit Game</button>
-                    <button onclick="deleteGame(${game.id})">Delete Game</button>
-                </div>
+            const gameCard = document.createElement('div');
+            gameCard.classList.add('game-card');
+            gameCard.innerHTML = `
+                <h3>${game.title}</h3>
+                <p>Genre: ${game.genre}</p>
+                <p>Price: ${game.price}</p>
+                <p>Quantity: ${game.quantity}</p>
+                <p>Status: ${game.loan_status ? 'Loaned' : 'Available'}</p>
+                <button onclick="loanGame(${game.id})">Loan</button>
+                <button onclick="editGame(${game.id})">Edit</button>
+                <button onclick="deleteGame(${game.id})">Delete</button>
             `;
+            gamesList.appendChild(gameCard);
         });
     } catch (error) {
         console.error('Error fetching games:', error);
@@ -39,6 +40,7 @@ async function addGame() {
         });
 
         document.getElementById('game-title').value = '';
+        document.getElementById('game-genre').value = '';
         document.getElementById('game-price').value = '';
         document.getElementById('game-quantity').value = '';
         getGames();
@@ -62,7 +64,7 @@ async function loanGame(gameId) {
             customer_id: customerId
         });
         alert("Game loaned successfully!");
-        getGames(); // Update the games list
+        getGames();
     } catch (error) {
         console.error('Error loaning game:', error);
         alert("Failed to loan the game.");
@@ -88,7 +90,7 @@ async function editGame(gameId) {
             quantity: newQuantity
         });
         alert("Game updated successfully!");
-        getGames(); // Update the games list
+        getGames();
     } catch (error) {
         console.error('Error editing game:', error);
         alert("Failed to edit the game.");
@@ -104,7 +106,7 @@ async function deleteGame(gameId) {
     try {
         await axios.delete('http://127.0.0.1:5000/games/' + gameId);
         alert("Game deleted successfully!");
-        getGames(); // Update the games list
+        getGames();
     } catch (error) {
         console.error('Error deleting game:', error);
         alert("Failed to delete the game.");

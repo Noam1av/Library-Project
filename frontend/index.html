@@ -36,10 +36,22 @@
                 </div>
 
                 <h2>All Games</h2>
-                <div id="games-list" class="games-grid"></div>
+                <div id="games-list" class="games-container">
+                    <!-- כאן רשימת המשחקים תהיה מוצגת ב-HTML עצמו -->
+                    <div class="game-card">
+                        <h3>Example Game</h3>
+                        <p>Genre: Action</p>
+                        <p>Price: $50</p>
+                        <p>Quantity: 5</p>
+                        <p>Status: Available</p>
+                        <button onclick="loanGame(1)">Loan</button>
+                        <button onclick="editGame(1)">Edit</button>
+                        <button onclick="deleteGame(1)">Delete</button>
+                    </div>
+                </div>
 
                 <h2>Loaned Games</h2>
-                <div id="loaned-games-list" class="games-grid"></div>
+                <div id="loaned-games-list" class="games-container"></div>
             </div>
         </div>
     </div>
