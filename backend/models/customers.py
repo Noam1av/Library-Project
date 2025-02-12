@@ -6,4 +6,5 @@ class Customer(db.Model):
     name = db.Column(db.String(120), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     phone = db.Column(db.String(15), nullable=False)
-
+    games_relationship = db.Column(
+        db.Integer, db.ForeignKey('game.id'), nullable=False)

@@ -42,6 +42,7 @@ def get_games():
                 'price': game.price,
                 'quantity': game.quantity,
                 'loan_status': game.loan_status,
+                'customer_relationship': game.customer_relationship
             }
             games_list.append(game_data)
 
@@ -126,15 +127,13 @@ def logout():
 @app.route('/games/<int:game_id>/loan', methods=['PUT'])
 def loan_game(game_id):
     data = request.json
-    customerName = data.get('name')  # מזהה הלקוח שמשאיל את המשחק
+    customer_id = data.get('customer_id')  # מזהה הלקוח שמשאיל את המשחק
 
     # מציאת המשחק
     game = Game.query.get(game_id)
     if not game:
         return jsonify({'error': 'Game not found'}), 404
-    customer = Customer.query.get(customerName)
-    if not customer:
-        return jsonify({'error': 'Customer not found'}), 404
+
     # אם המשחק כבר מושאל, לא ניתן לשאול אותו שוב
     if game.loan_status:
         return jsonify({'error': 'Game is already loaned out'}), 400
@@ -146,60 +145,6 @@ def loan_game(game_id):
     db.session.commit()
     return jsonify({'message': f'Game "{game.title}" loaned to customer with ID {customer_id} successfully'}), 200
 
-
-@app.route('/customers', methods=['POST'])
-def add_customer():
-    data = request.json
-    if not data['name'] or not data['email'] or not data['phone']:
-        return jsonify({'error': 'All fields are required'}), 400
-
-    new_customer = Customer(
-        name=data['name'],
-        email=data['email'],
-        phone=data['phone']
-    )
-    db.session.add(new_customer)
-    db.session.commit()
-    return jsonify({'message': 'Customer added successfully'}), 201
-
-
-@app.route('/customers', methods=['GET'])
-def get_customers():
-    try:
-        customers = Customer.query.all()
-        customers_list = [{'id': c.id, 'name': c.name, 'email': c.email, 'phone': c.phone} for c in customers]
-        return jsonify({'customers': customers_list}), 200
-    except Exception as e:
-        return jsonify({'error': 'Failed to retrieve customers', 'message': str(e)}), 500
-
-
-@app.route('/customers/<int:customer_id>', methods=['PUT'])
-def edit_customer(customer_id):
-    data = request.json
-    customer = Customer.query.get(customer_id)
-    if not customer:
-        return jsonify({'error': 'Customer not found'}), 404
-
-    if 'name' in data:
-        customer.name = data['name']
-    if 'email' in data:
-        customer.email = data['email']
-    if 'phone' in data:
-        customer.phone = data['phone']
-
-    db.session.commit()
-    return jsonify({'message': 'Customer updated successfully'}), 200
-
-
-@app.route('/customers/<int:customer_id>', methods=['DELETE'])
-def delete_customer(customer_id):
-    customer = Customer.query.get(customer_id)
-    if not customer:
-        return jsonify({'error': 'Customer not found'}), 404
-
-    db.session.delete(customer)
-    db.session.commit()
-    return jsonify({'message': 'Customer deleted successfully'}), 200
 
 
 if __name__ == '__main__':
