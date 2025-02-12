@@ -1,3 +1,103 @@
+async function getCustomers() {
+    try {
+        const response = await axios.get('http://127.0.0.1:5000/customers');
+        const customersList = document.getElementById('customers-list');
+        customersList.innerHTML = '';
+
+        response.data.customers.forEach(customer => {
+            const customerCard = document.createElement('div');
+            customerCard.classList.add('customer-card');
+            customerCard.innerHTML = `
+                <h3>${customer.name}</h3>
+                <p>Email: ${customer.email}</p>
+                <p>Phone: ${customer.phone}</p>
+                <button onclick="editCustomer(${customer.id})">Edit</button>
+                <button onclick="deleteCustomer(${customer.id})">Delete</button>
+            `;
+            customersList.appendChild(customerCard);
+        });
+    } catch (error) {
+        console.error('Error fetching customers:', error);
+        alert('Failed to load customers.');
+    }
+}
+
+async function addCustomer() {
+    const name = document.getElementById('customer-name').value;
+    const email = document.getElementById('customer-email').value;
+    const phone = document.getElementById('customer-phone').value;
+
+    try {
+        await axios.post('http://127.0.0.1:5000/customers', {
+            name: name,
+            email: email,
+            phone: phone
+        });
+
+        document.getElementById('customer-name').value = '';
+        document.getElementById('customer-email').value = '';
+        document.getElementById('customer-phone').value = '';
+        getCustomers();
+        alert('Customer added successfully!');
+    } catch (error) {
+        console.error('Error adding customer:', error);
+        alert('Failed to add customer.');
+    }
+}
+
+async function editCustomer(customerId) {
+    const newName = prompt("Enter the new name:");
+    const newEmail = prompt("Enter the new email:");
+    const newPhone = prompt("Enter the new phone:");
+
+    const data = {};
+
+    if (newName) {
+        data.name = newName;
+    }
+    if (newEmail) {
+        data.email = newEmail;
+    }
+    if (newPhone) {
+        data.phone = newPhone;
+    }
+
+    if (Object.keys(data).length === 0) {
+        alert("Please fill in at least one field.");
+        return;
+    }
+
+    try {
+        await axios.put(`http://127.0.0.1:5000/customers/${customerId}`, data);
+        alert("Customer updated successfully!");
+        getCustomers();
+    } catch (error) {
+        console.error('Error editing customer:', error);
+        alert("Failed to edit the customer.");
+    }
+}
+
+async function deleteCustomer(customerId) {
+    const confirmDelete = confirm("Are you sure you want to delete this customer?");
+    if (!confirmDelete) {
+        return;
+    }
+
+    try {
+        await axios.delete(`http://127.0.0.1:5000/customers/${customerId}`);
+        alert("Customer deleted successfully!");
+        getCustomers();
+    } catch (error) {
+        console.error('Error deleting customer:', error);
+        alert("Failed to delete the customer.");
+    }
+}
+
+window.onload = function() {
+    getCustomers();
+};
+
+
 async function getGames() {
     try {
         const response = await axios.get('http://127.0.0.1:5000/games');
@@ -52,22 +152,44 @@ async function addGame() {
 }
 
 async function loanGame(gameId) {
-    const customerId = prompt("Enter the customer ID for the loan:");
-    if (!customerId) {
-        alert("Please enter a valid customer ID.");
+    const customerName = prompt("Enter the customer's name for the loan:");
+    if (!customerName) {
+        alert("Please enter a valid name.");
         return;
     }
 
     try {
-        await axios.post('http://127.0.0.1:5000/loan', {
-            game_id: gameId,
-            customer_id: customerId
-        });
-        alert("Game loaned successfully!");
-        getGames();
+        const response = await axios.post('http://127.0.0.1:5000/get_customer', { name: customerName });
+        const customer = response.data;
+
+        if (!customer || !customer.id) {
+            alert("Customer not found.");
+            return;
+        }
+
+        await axios.put(`http://127.0.0.1:5000/games/${gameId}/loan`, { customer_id: customer.id });
+        alert(`Game loaned to ${customer.name} successfully!`);
+        getGames(); // רענון רשימת המשחקים
     } catch (error) {
         console.error('Error loaning game:', error);
         alert("Failed to loan the game.");
+    }
+}
+async function getLoans() {
+    try {
+        const response = await axios.get('http://127.0.0.1:5000/loans');
+        const loans = response.data;
+
+        let output = "<h2>Loaned Games</h2><ul>";
+        loans.forEach(loan => {
+            output += `<li><strong>${loan.title}</strong> - Loaned to ${loan.customer_name}</li>`;
+        });
+        output += "</ul>";
+
+        document.getElementById("loans-container").innerHTML = output;
+    } catch (error) {
+        console.error('Error fetching loans:', error);
+        alert("Failed to load loaned games.");
     }
 }
 

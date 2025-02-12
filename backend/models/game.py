@@ -7,5 +7,3 @@ class Game(db.Model):
     price = db.Column(db.Integer, nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
     loan_status = db.Column(db.Boolean, nullable=False, default=False)  # אם המשחק מושאל
-    customer_relationship = db.Column(
-        db.Integer, db.ForeignKey('customer.id'), default=None)  # יכיל את מזהה הלקוח
